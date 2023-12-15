@@ -17,6 +17,7 @@ FOR EACH ROW
 BEGIN
     SET NEW.DNI_Cifrado = AES_ENCRYPT(NEW.DNI, 'clave_secreta');
 END;
+```
 
 Procedimiento Almacenado para Descifrar el DNI de Pacientes
 Se ha creado un procedimiento almacenado para facilitar la recuperación del DNI descifrado de los pacientes. Esto permite a los usuarios autorizados obtener la información del paciente de manera segura.
@@ -28,6 +29,7 @@ BEGIN
     SELECT NombreCompleto, AES_DECRYPT(DNI_Cifrado, 'clave_secreta') AS DNI
     FROM Pacientes;
 END;
+```
 
 Consideraciones de Seguridad
 Es importante destacar que la implementación del cifrado y descifrado del DNI tiene como objetivo proteger la confidencialidad de la información del paciente. Se debe gestionar de manera segura la clave secreta utilizada en el proceso de cifrado para garantizar la integridad del sistema.
