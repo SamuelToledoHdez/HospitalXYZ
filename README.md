@@ -19,7 +19,8 @@ BEGIN
 END;
 ```
 
-Procedimiento Almacenado para Descifrar el DNI de Pacientes
+### Procedimiento Almacenado para Descifrar el DNI de Pacientes
+
 Se ha creado un procedimiento almacenado para facilitar la recuperación del DNI descifrado de los pacientes. Esto permite a los usuarios autorizados obtener la información del paciente de manera segura.
 
 ```sql
@@ -31,6 +32,7 @@ BEGIN
 END;
 ```
 
-Consideraciones de Seguridad
+## Consideraciones de Seguridad
+
 Es importante destacar que la implementación del cifrado y descifrado del DNI tiene como objetivo proteger la confidencialidad de la información del paciente. Se debe gestionar de manera segura la clave secreta utilizada en el proceso de cifrado para garantizar la integridad del sistema.
 
