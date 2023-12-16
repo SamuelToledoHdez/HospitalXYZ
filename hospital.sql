@@ -91,10 +91,41 @@ BEFORE INSERT ON "pacientes"
 FOR EACH ROW
 EXECUTE FUNCTION CifrarDNITriggerFunction();
 
+-- Crear la función de descifrado
+CREATE OR REPLACE FUNCTION DescifrarDNI(dni_cifrado TEXT)
+RETURNS TEXT AS $$
+BEGIN
+  -- Utilizar la función de descifrado pgp_sym_decrypt_bytea con la clave secreta
+  RETURN encode(pgp_sym_decrypt_bytea(dni_cifrado::bytea, 'clave_secreta'), 'escape')::text;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Crear un procedimiento almacenado que utiliza la función de descifrado
+CREATE OR REPLACE FUNCTION ConsultarPaciente()
+RETURNS TABLE (
+  nombrecompleto VARCHAR(100),
+  dni TEXT,
+  historialmedico TEXT,
+  telefono1 VARCHAR(20),
+  fechanacimiento DATE
+) AS $$
+BEGIN
+  RETURN QUERY
+    SELECT
+      "pacientes".nombrecompleto,
+      DescifrarDNI("pacientes".dni_cifrado) AS dni,
+      "pacientes".historialmedico,
+      "pacientes".telefono1,
+      "pacientes".fechanacimiento
+    FROM "pacientes";
+END;
+$$ LANGUAGE plpgsql;
 
 -----------------------------------------------------------------------------------------------
 
 INSERT INTO "pacientes" (nombrecompleto, dni_cifrado, historialmedico, telefono1, fechanacimiento)
 VALUES ('Nombre Apellido', '12345678', 'Historial de prueba', '123456789', '2000-01-01');
 
-SELECT * FROM "pacientes";
+SELECT * FROM Pacientes;
+SELECT * FROM ConsultarPaciente();
