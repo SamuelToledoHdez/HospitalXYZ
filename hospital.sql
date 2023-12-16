@@ -1,5 +1,5 @@
 
-DROP DATABASE IF EXISTS hospitalxyz;
+--DROP DATABASE IF EXISTS hospitalxyz;
 DROP TABLE IF EXISTS Citas;
 
 DROP TABLE IF EXISTS Enfermero;
@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS Pacientes;
 DROP TABLE IF EXISTS RecetaMedica;
 DROP TABLE IF EXISTS Medico;
 
-CREATE DATABASE hospitalxyz;
+--CREATE DATABASE hospitalxyz;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Conectar a la base de datos recién creada
@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS Medico (
 -- Crear la tabla de pacientes
 CREATE TABLE IF NOT EXISTS Pacientes (
     NombreCompleto VARCHAR(100),
-    DNI_Cifrado TEXT PRIMARY KEY,
+    DNI_Cifrado TEXT,
+    DNI TEXT PRIMARY KEY,
     HistorialMedico TEXT,
     Telefono1 VARCHAR(20),
     FechaNacimiento DATE,
@@ -43,7 +44,7 @@ CREATE TABLE IF NOT EXISTS Citas (
     CodigoCita SERIAL PRIMARY KEY,
     Fecha DATE,
     Motivo VARCHAR(255),
-    DNI_Cifrado TEXT REFERENCES Pacientes(DNI_Cifrado)
+    DNI TEXT REFERENCES Pacientes(DNI)
 );
 
 
@@ -106,7 +107,7 @@ CREATE OR REPLACE FUNCTION CifrarDNITriggerFunction()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Utilizar la función de encriptación pgp_sym_encrypt con una clave secreta
-  NEW.dni_cifrado := pgp_sym_encrypt(NEW.dni_cifrado, 'clave_secreta');
+  NEW.dni_cifrado := pgp_sym_encrypt(NEW.dni, 'clave_secreta');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -116,6 +117,7 @@ CREATE TRIGGER CifrarDNITrigger
 BEFORE INSERT ON "pacientes"
 FOR EACH ROW
 EXECUTE FUNCTION CifrarDNITriggerFunction();
+
 
 CREATE OR REPLACE FUNCTION DescifrarDNI(dni_cifrado TEXT)
 RETURNS TEXT AS $$
@@ -179,15 +181,12 @@ INSERT INTO Medico (NumeroColegiado, Nombre, Especialidad) VALUES
 (3, 'Dr. Carlos Rodríguez', 'Cirugía General');
 
 -- Insertar pacientes
-INSERT INTO Pacientes (NombreCompleto, DNI_Cifrado, HistorialMedico, Telefono1, FechaNacimiento, Edad, NumeroColegiado) VALUES
-('Ana Martínez', '12345678A', 'Historial de Ana', '123-456-7890', '1990-05-15', 32, 1),
-('José Gómez', '98765432B', 'Historial de José', '987-654-3210', '1985-08-22', 37, 2),
-('Laura Fernández', '56789012C', 'Historial de Laura', '555-123-4567', '2000-11-10', 22, 3);
+INSERT INTO Pacientes (NombreCompleto, DNI, HistorialMedico, Telefono1, FechaNacimiento, Edad, NumeroColegiado) VALUES
+('Ana Martínez', '12345678A', 'Historial de Ana', '123-456-7890', '1990-05-15', 32, 1);
 
--- Insertar citas con DNI_Cifrado válido
-INSERT INTO Citas (Fecha, Motivo, DNI_Cifrado) VALUES
+
+INSERT INTO Citas (Fecha, Motivo, DNI) VALUES
 ('2023-12-20', 'Consulta rutinaria', '12345678A');
-
 
 -- Intentar insertar una cita con DNI_Cifrado no existente (debería lanzar una excepción)
 
