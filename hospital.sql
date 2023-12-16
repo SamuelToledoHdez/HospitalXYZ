@@ -85,4 +85,22 @@ BEGIN
     FROM Pacientes;
 END //
 DELIMITER ;
+
+
+-- trigger para comprobar si un medicamento de una receta existe --
+DELIMITER //
+
+CREATE TRIGGER VerificarExistenciaMedicamento
+BEFORE INSERT ON RecetaMedica
+FOR EACH ROW
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM Medicamento WHERE CodigoMedicamento = NEW.CodigoMedicamento) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El medicamento especificado en la receta no existe.';
+    END IF;
+END;
+
+//
+
+DELIMITER ;
 -- Fin del script
