@@ -1,20 +1,21 @@
--- Crear la base de datos
-CREATE DATABASE IF NOT EXISTS HospitalXYZ;
-USE HospitalXYZ;
+CREATE DATABASE HospitalXYZ;
+
+-- Conectar a la base de datos recién creada
+\c HospitalXYZ;
 
 -- Crear la tabla de pacientes
 CREATE TABLE IF NOT EXISTS Pacientes (
     NombreCompleto VARCHAR(100),
-    DNI_Cifrado VARBINARY(255) PRIMARY KEY,
+    DNI_Cifrado BYTEA PRIMARY KEY,
     HistorialMedico TEXT,
     Telefono1 VARCHAR(20),
     FechaNacimiento DATE,
-    Edad INT GENERATED ALWAYS AS (YEAR(CURDATE()) - YEAR(FechaNacimiento)) STORED
+    Edad INT GENERATED ALWAYS AS (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM FechaNacimiento)) STORED
 );
 
 -- Crear la tabla de citas médicas
 CREATE TABLE IF NOT EXISTS Citas (
-    CodigoCita INT PRIMARY KEY AUTO_INCREMENT,
+    CodigoCita SERIAL PRIMARY KEY,
     Fecha DATE,
     Motivo VARCHAR(255)
 );
@@ -24,8 +25,8 @@ CREATE TABLE IF NOT EXISTS Medico (
     NumeroColegiado INT PRIMARY KEY,
     Nombre VARCHAR(100),
     Especialidad VARCHAR(255)
-    
 );
+
 -- Crear la tabla de Enfermero
 CREATE TABLE IF NOT EXISTS Enfermero (
     DNI VARCHAR(20) PRIMARY KEY,
@@ -34,22 +35,21 @@ CREATE TABLE IF NOT EXISTS Enfermero (
 
 -- Crear la tabla de RecetaMedica
 CREATE TABLE IF NOT EXISTS RecetaMedica (
-    CodigoReceta INT PRIMARY KEY,
+    CodigoReceta SERIAL PRIMARY KEY,
     Fecha DATE
 );
 
 -- Crear la tabla de Medicamento
 CREATE TABLE IF NOT EXISTS Medicamento (
-    CodigoMedicamento INT PRIMARY KEY,
+    CodigoMedicamento SERIAL PRIMARY KEY,
     Tipo VARCHAR(50),
     Precio DECIMAL(10, 2),
     Nombre VARCHAR(100)
 );
 
-
 -- Crear la tabla de equipos médicos
 CREATE TABLE IF NOT EXISTS EquiposMedicos (
-    CodigoEquipo INT PRIMARY KEY,
+    CodigoEquipo SERIAL PRIMARY KEY,
     Tipo VARCHAR(50),
     Precio DECIMAL(10, 2),
     Nombre VARCHAR(100)
@@ -57,11 +57,10 @@ CREATE TABLE IF NOT EXISTS EquiposMedicos (
 
 -- Crear la tabla de unidades médicas
 CREATE TABLE IF NOT EXISTS UnidadesMedicas (
-    CodigoUnidad INT PRIMARY KEY,
+    CodigoUnidad SERIAL PRIMARY KEY,
     Especialidad VARCHAR(50),
-    Localizacion VARCHAR(255),
+    Localizacion VARCHAR(255)
 );
-
 
 -------------------------------------------------------------------------------------
 
