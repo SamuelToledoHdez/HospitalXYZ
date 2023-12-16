@@ -1,16 +1,20 @@
-
 --DROP DATABASE IF EXISTS hospitalxyz;
-DROP TABLE IF EXISTS Citas;
-
-DROP TABLE IF EXISTS Enfermero;
-
-DROP TABLE IF EXISTS Medicamento;
-DROP TABLE IF EXISTS EquiposMedicos;
-DROP TABLE IF EXISTS UnidadesMedicas;
-DROP TABLE IF EXISTS Pacientes;
-
-DROP TABLE IF EXISTS RecetaMedica;
+DROP TABLE IF EXISTS Cita;
+DROP TABLE IF EXISTS Paciente;
+DROP TABLE IF EXISTS Telefono;
 DROP TABLE IF EXISTS Medico;
+DROP TABLE IF EXISTS Equipo_medico;
+DROP TABLE IF EXISTS Enfermero;
+DROP TABLE IF EXISTS Ayuda;
+DROP TABLE IF EXISTS Utiliza;
+DROP TABLE IF EXISTS Atendido_por;
+DROP TABLE IF EXISTS Receta_medica;
+DROP TABLE IF EXISTS Medicamento;
+DROP TABLE IF EXISTS Unidad_medica;
+DROP TABLE IF EXISTS Unidad_psiquiatria;
+DROP TABLE IF EXISTS Unidad_respiratoria;
+DROP TABLE IF EXISTS Unidad_cardiaca;
+DROP TABLE IF EXISTS Hospital;
 
 --CREATE DATABASE hospitalxyz;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -18,68 +22,128 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- Conectar a la base de datos recién creada
 \c hospitalxyz;
 
-
--- Crear la tabla de personal médico
-CREATE TABLE IF NOT EXISTS Medico (
-    NumeroColegiado INT PRIMARY KEY,
-    Nombre VARCHAR(100),
-    Especialidad VARCHAR(255)
-);
--- Crear la tabla de pacientes
-CREATE TABLE IF NOT EXISTS Pacientes (
-    NombreCompleto VARCHAR(100),
-    DNI_Cifrado TEXT,
-    DNI TEXT PRIMARY KEY,
-    HistorialMedico TEXT,
-    Telefono1 VARCHAR(20),
-    FechaNacimiento DATE,
-    Edad INT,
-    NumeroColegiado INT REFERENCES medico(NumeroColegiado)
-
-
-);
-
--- Crear la tabla de citas médicas
-CREATE TABLE IF NOT EXISTS Citas (
-    CodigoCita SERIAL PRIMARY KEY,
+-- Crear la tabla de las citas médicas
+CREATE TABLE IF NOT EXISTS Cita (
+    Codigo SERIAL,
     Fecha DATE,
     Motivo VARCHAR(255),
-    DNI TEXT REFERENCES Pacientes(DNI)
+    DNI_paciente TEXT REFERENCES Pacientes(DNI),
+    PRIMARY KEY (Codigo, DNI_paciente)
 );
 
+-- Crear la tabla de los pacientes
+CREATE TABLE IF NOT EXISTS Paciente (
+    DNI TEXT PRIMARY KEY,
+    DNI_cifrado TEXT,
+    Nombre VARCHAR(100),
+    Historial_medico TEXT,
+    Fecha_nacimiento DATE,
+    Edad INT -- Debe ser derivado 
+);
 
+-- Crear la tabla de los teléfonos de los pacientes
+CREATE TABLE IF NOT EXISTS Telefono (
+    DNI_paciente TEXT REFERENCES Pacientes(DNI),
+    Telefono INT,
+);
 
--- Crear la tabla de Enfermero
+-- Crear la tabla del personal médico
+CREATE TABLE IF NOT EXISTS Medico (
+    Numero_colegiado INT PRIMARY KEY,
+    Nombre VARCHAR(100),
+    Especialidad VARCHAR(255),
+    Codigo_unidad_medica SERIAL REFERENCES Unidad_medica(Codigo)
+);
+
+-- Crear la tabla de equipos médicos
+CREATE TABLE IF NOT EXISTS Equipo_medico (
+    Codigo SERIAL PRIMARY KEY,
+    Tipo VARCHAR(50),
+    Precio DECIMAL(10, 2),
+    Nombre VARCHAR(100),
+    Codigo_unidad_medica SERIAL REFERENCES Unidad_medica(Codigo)
+);
+
+-- Crear la tabla de los enfermeros
 CREATE TABLE IF NOT EXISTS Enfermero (
     DNI VARCHAR(20) PRIMARY KEY,
     Nombre VARCHAR(100)
 );
 
--- Crear la tabla de RecetaMedica
-CREATE TABLE IF NOT EXISTS RecetaMedica (
-    CodigoReceta SERIAL PRIMARY KEY,
-    Fecha DATE,
-    NumeroColegiado INT REFERENCES Medico(NumeroColegiado)
+-- Crear la tabla de los enfermeros y médicos
+CREATE TABLE IF NOT EXISTS Ayuda (
+    DNI_enfermero TEXT REFERENCES Enfermero(DNI),,
+    Numero_colegiado INT REFERENCES Medico(Numero_colegiado),
+    PRIMARY KEY (DNI_enfermero, Numero_colegiado)
 );
 
--- Crear la tabla de Medicamento
+-- Crear la tabla de los médicos y equipos médicos
+CREATE TABLE IF NOT EXISTS Utiliza (
+    Codigo_equipo_medico SERIAL REFERENCES Equipo_medico(Codigo),
+    Numero_colegiado INT REFERENCES Medico(Numero_colegiado),
+    PRIMARY KEY (Codigo_equipo_medico, Numero_colegiado)
+);
+
+-- Crear la tabla de los médicos, enferemos y pacientes
+CREATE TABLE IF NOT EXISTS Atendido_por (
+    DNI_Paciente TEXT REFERENCES Paciente(DNI),
+    Numero_colegiado INT REFERENCES Medico(Numero_colegiado),
+    DNI_enfermero TEXT REFERENCES Enfermero(DNI)
+    PRIMARY KEY (DNI_Paciente, Numero_colegiado, DNI_enfermero)
+);
+
+-- Crear la tabla de las recetas médicas
+CREATE TABLE IF NOT EXISTS Receta_medica (
+    Codigo SERIAL PRIMARY KEY,
+    Fecha DATE,
+    Numero_colegiado INT REFERENCES Medico(Numero_colegiado)
+);
+
+-- Crear la tabla de los medicamentos
 CREATE TABLE IF NOT EXISTS Medicamento (
-    CodigoMedicamento SERIAL PRIMARY KEY,
+    Codigo SERIAL PRIMARY KEY,
     Tipo VARCHAR(50),
     Precio DECIMAL(10, 2),
     Nombre VARCHAR(100),
-    Codigo_receta SERIAL REFERENCES RecetaMedica(CodigoReceta)
-
+    Cantidad INT,
+    Codigo_receta SERIAL REFERENCES Receta_medica(Codigo)
 );
 
--- Crear la tabla de equipos médicos
-CREATE TABLE IF NOT EXISTS EquiposMedicos (
-    CodigoEquipo SERIAL PRIMARY KEY,
+-- Crear la tabla de las unidades médicas
+CREATE TABLE IF NOT EXISTS Unidad_medica (
+    Codigo SERIAL,
+    Localizacion_hospital VARCHAR(255) REFERENCES Hospital(Localizacion),
+    Nombre_hospital TEXT REFERENCES Hospital(Nombre),
+    Localizacion TEXT,
     Tipo VARCHAR(50),
-    Precio DECIMAL(10, 2),
-    Nombre VARCHAR(100)
+    PRIMARY KEY (Codigo, Localizacion_hospital, Nombre_hospital)
 );
--- Crear la tabla de hospitales
+
+-- Crear la tabla de la unidad de psiquiatría
+CREATE TABLE IF NOT EXISTS Unidad_psiquiatria (
+    Código_unidad SERIAL REFERENCES Unidad_medica(Codigo),
+    Localizacion_hospital VARCHAR(255) REFERENCES Hospital(Localizacion),
+    Nombre_hospital TEXT REFERENCES Hospital(Nombre),
+    PRIMARY KEY (Código_unidad, Localizacion_hospital, Nombre_hospital)
+);
+
+-- Crear la tabla de la unidad respiratoria
+CREATE TABLE IF NOT EXISTS Unidad_respiratoria (
+    Código_unidad SERIAL REFERENCES Unidad_medica(Codigo),
+    Localizacion_hospital VARCHAR(255) REFERENCES Hospital(Localizacion),
+    Nombre_hospital TEXT REFERENCES Hospital(Nombre),
+    PRIMARY KEY (Código_unidad, Localizacion_hospital, Nombre_hospital)
+);
+
+-- Crear la tabla de la unidad cardíaca
+CREATE TABLE IF NOT EXISTS Unidad_cardiaca (
+    Código_unidad SERIAL REFERENCES Unidad_medica(Codigo),
+    Localizacion_hospital VARCHAR(255) REFERENCES Hospital(Localizacion),
+    Nombre_hospital TEXT REFERENCES Hospital(Nombre),
+    PRIMARY KEY (Código_unidad, Localizacion_hospital, Nombre_hospital)
+);
+
+-- Crear la tabla de los hospitales
 CREATE TABLE IF NOT EXISTS Hospital (
     Nombre TEXT,
     Localizacion TEXT,
@@ -87,18 +151,6 @@ CREATE TABLE IF NOT EXISTS Hospital (
     UNIQUE(Nombre),
     UNIQUE(Localizacion)
 );
-
--- Crear la tabla de unidades médicas
-CREATE TABLE IF NOT EXISTS UnidadesMedicas (
-    CodigoUnidad SERIAL PRIMARY KEY,
-    Especialidad VARCHAR(50),
-    Localizacion VARCHAR(255),
-    Nombre_hospital TEXT,
-    Localizacion_hospital TEXT,
-    FOREIGN KEY (Nombre_hospital, Localizacion_hospital) REFERENCES Hospital(Nombre, Localizacion)
-);
-
-
 
 -------------------------------------------------------------------------------------
 
