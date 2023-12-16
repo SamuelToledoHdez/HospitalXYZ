@@ -103,4 +103,20 @@ END;
 //
 
 DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER VerificarExistenciaMedicoEnfermero
+BEFORE INSERT ON Citas
+FOR EACH ROW
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM Medico WHERE NumeroColegiado = NEW.NumeroColegiado) AND NOT EXISTS (SELECT 1 FROM Enfermero WHERE DNI = NEW.DNIEnfermero) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El médico o enfermero especificado en la cita no existe.';
+    END IF;
+END;
+
+//
+
+DELIMITER ;
 -- Fin del script
