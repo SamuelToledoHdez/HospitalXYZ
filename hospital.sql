@@ -1,4 +1,15 @@
+DROP DATABASE IF EXISTS HospitalXYZ;
+DROP TABLE IF EXISTS Pacientes;
+DROP TABLE IF EXISTS Citas;
+DROP TABLE IF EXISTS Medico;
+DROP TABLE IF EXISTS Enfermero;
+DROP TABLE IF EXISTS RecetaMedica;
+DROP TABLE IF EXISTS Medicamento;
+DROP TABLE IF EXISTS EquiposMedicos;
+DROP TABLE IF EXISTS UnidadesMedicas;
+
 CREATE DATABASE HospitalXYZ;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Conectar a la base de datos recién creada
 \c HospitalXYZ;
@@ -6,11 +17,11 @@ CREATE DATABASE HospitalXYZ;
 -- Crear la tabla de pacientes
 CREATE TABLE IF NOT EXISTS Pacientes (
     NombreCompleto VARCHAR(100),
-    DNI_Cifrado BYTEA PRIMARY KEY,
+    DNI_Cifrado TEXT,
     HistorialMedico TEXT,
     Telefono1 VARCHAR(20),
     FechaNacimiento DATE,
-    Edad INT GENERATED ALWAYS AS (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM FechaNacimiento)) STORED
+    Edad INT
 );
 
 -- Crear la tabla de citas médicas
@@ -64,58 +75,26 @@ CREATE TABLE IF NOT EXISTS UnidadesMedicas (
 
 -------------------------------------------------------------------------------------
 
-DELIMITER //
-
--- Trigger para cifrar el DNI al insertar un nuevo paciente
-CREATE TRIGGER CifrarDNITrigger BEFORE INSERT ON Pacientes
-FOR EACH ROW
+-- Crear la función de encriptación
+CREATE OR REPLACE FUNCTION CifrarDNITriggerFunction()
+RETURNS TRIGGER AS $$
 BEGIN
-    SET NEW.DNI_Cifrado = AES_ENCRYPT(NEW.DNI, 'clave_secreta');
-END //
-    
-
-DELIMITER ;
-
-
-DELIMITER //
-CREATE PROCEDURE DescifrarDNI()
-BEGIN
-    SELECT PacienteID, NombreCompleto, AES_DECRYPT(DNI_Cifrado, 'clave_secreta') AS DNI
-    FROM Pacientes;
-END //
-DELIMITER ;
-
-
--- trigger para comprobar si un medicamento de una receta existe --
-DELIMITER //
-
-CREATE TRIGGER VerificarExistenciaMedicamento
-BEFORE INSERT ON RecetaMedica
-FOR EACH ROW
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM Medicamento WHERE CodigoMedicamento = NEW.CodigoMedicamento) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'El medicamento especificado en la receta no existe.';
-    END IF;
+  -- Utilizar la función de encriptación pgp_sym_encrypt con una clave secreta
+  NEW.dni_cifrado := pgp_sym_encrypt(NEW.dni_cifrado, 'clave_secreta');
+  RETURN NEW;
 END;
+$$ LANGUAGE plpgsql;
 
-//
-
-DELIMITER ;
-
-DELIMITER //
-
-CREATE TRIGGER VerificarExistenciaMedicoEnfermero
-BEFORE INSERT ON Citas
+-- Crear el trigger
+CREATE TRIGGER CifrarDNITrigger
+BEFORE INSERT ON "pacientes"
 FOR EACH ROW
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM Medico WHERE NumeroColegiado = NEW.NumeroColegiado) AND NOT EXISTS (SELECT 1 FROM Enfermero WHERE DNI = NEW.DNIEnfermero) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'El médico o enfermero especificado en la cita no existe.';
-    END IF;
-END;
+EXECUTE FUNCTION CifrarDNITriggerFunction();
 
-//
 
-DELIMITER ;
--- Fin del script
+-----------------------------------------------------------------------------------------------
+
+INSERT INTO "pacientes" (nombrecompleto, dni_cifrado, historialmedico, telefono1, fechanacimiento)
+VALUES ('Nombre Apellido', '12345678', 'Historial de prueba', '123456789', '2000-01-01');
+
+SELECT * FROM "pacientes";
