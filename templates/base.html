@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} {% endblock %} - Sistema Hospitalario</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 10px;
+        }
+
+        nav {
+            background-color: #34495e;
+            overflow: hidden;
+        }
+
+        nav a {
+            color: #ecf0f1;
+            font-size: 1.2em;
+            margin: 10px;
+            padding: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .section {
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            padding: 20px;
+        }
+
+        .review {
+            font-size: 18px;
+            margin-left: 20px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sistema Hospitalario</h1>
+    </header>
+    <nav>
+        <a href="{{ url_for('index') }}">Pacientes</a>
+        <a href="{{ url_for('create') }}">Nueva cita</a>
+        <a href="{{ url_for('delete') }}">Eliminar cita</a>
+        <a href="{{ url_for('update') }}">Actualizar cita</a>
+        <a href="{{ url_for('about') }}">About</a>
+    </nav>
+    <hr>
+    <div class="content">
+        {% block content %} {% endblock %}
+    </div>
+</body>
+</html>
