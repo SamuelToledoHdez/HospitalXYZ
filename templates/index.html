@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Pacientes {% endblock %}</h1>
+    {% for patient in patients %}
+        <div class='patient'>
+            <h3>DNI: {{ patient[0] }} </h3>
+            <h3>Nombre completo: {{ patient[2] }}</h3>
+            <i><p>(Historial del paciente: {{ patient[3] }})</p></i>
+            <p>Fecha de nacimiento: {{ patient[4] }}</p>
+
+            
+        </div>
+    {% endfor %}
+    
+{% endblock %}
