@@ -10,8 +10,8 @@ def get_db_connection():
         conn = psycopg2.connect(
             host='localhost',
             database="hospitalxyz",
-            user="postgres",
-            password="golden13"
+            user="",
+            password=""
         )
         return conn
     except psycopg2.Error as e:
