@@ -36,7 +36,7 @@ DROP FUNCTION IF EXISTS ConsultarPaciente();
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Conectar a la base de datos recién creada
-\c hospitalxyz;
+\c hospitalxyzz;
 
 -- Crear la tabla de los hospitales
 CREATE TABLE Hospital (
@@ -253,8 +253,7 @@ INSERT INTO Paciente (DNI, DNI_cifrado, Nombre, Historial_medico, Fecha_nacimien
 ('44444444F', 'cifrado444', 'Alejandro Gómez', 'Historial de Alejandro', '1992-07-15', 29),
 ('55555555G', 'cifrado555', 'Laura Pérez', 'Historial de Laura', '1987-09-30', 35),
 ('66666666H', 'cifrado666', 'Miguel Torres', 'Historial de Miguel', '1983-12-25', 39),
-('77777777I', 'cifrado777', 'Elena Ruiz', 'Historial de Elena', '1998-04-18', 24),
-('88888888J', 'cifrado888', 'David López', 'Historial de David', '1982-06-08', 40);
+('77777777I', 'cifrado777', 'Elena Ruiz', 'Historial de Elena', '1998-04-18', 24);
 
 
 
@@ -266,8 +265,16 @@ INSERT INTO Telefono (DNI_paciente, Telefono) VALUES
 ('44444444F', 444444444),
 ('55555555G', 555555555),
 ('66666666H', 666666666),
-('77777777I', 777777777),
-('88888888J', 888888888);
+('77777777I', 777777777);
+
+INSERT INTO Cita(Fecha, Motivo, DNI_paciente) VALUES
+('2023-03-10', 'Consulta de rutina', '11111111C'),
+('2023-04-05', 'Consulta de rutina', '22222222D'),
+('2023-05-20', 'Consulta de rutina', '33333333E'),
+('2023-06-15', 'Consulta de rutina', '44444444F'),
+('2023-07-25', 'Consulta de rutina', '55555555G'),
+('2023-08-30', 'Consulta de rutina', '66666666H'),
+('2023-10-18', 'Consulta de rutina', '77777777I');
 
 -- Insertar más valores en la tabla Enfermero
 INSERT INTO Enfermero (DNI, Nombre) VALUES
@@ -294,8 +301,7 @@ INSERT INTO Medico (Numero_colegiado, Nombre, Especialidad, Codigo_unidad_medica
 (111999, 'Dra. Soto', 'Endocrinología', 2, 'Hospital XYZ', 'Ciudad A'),
 (777333, 'Dr. Morales', 'Urología', 1, 'Hospital XYZ', 'Ciudad A'),
 (222444, 'Dra. Ríos', 'Gastroenterología', 2, 'Hospital XYZ', 'Ciudad A'),
-(666000, 'Dr. Vargas', 'Nefrología', 1, 'Hospital XYZ', 'Ciudad A'),
-(888111, 'Dra. Díaz', 'Oftalmología', 2, 'Hospital XYZ', 'Ciudad A');
+(666000, 'Dr. Vargas', 'Nefrología', 1, 'Hospital XYZ', 'Ciudad A');
 
 
 -- Insertar más valores en la tabla Ayuda
@@ -306,8 +312,7 @@ INSERT INTO Ayuda (DNI_enfermero, Numero_colegiado) VALUES
 ('F4444444', 111999),
 ('G5555555', 777333),
 ('H6666666', 222444),
-('I7777777', 666000),
-('J8888888', 888111);
+('I7777777', 666000);
 
 -- Insertar más valores en la tabla Atendido_por
 INSERT INTO Atendido_por (DNI_Paciente, Numero_colegiado, DNI_enfermero) VALUES
@@ -317,8 +322,7 @@ INSERT INTO Atendido_por (DNI_Paciente, Numero_colegiado, DNI_enfermero) VALUES
 ('44444444F', 111999, 'F4444444'),
 ('55555555G', 777333, 'G5555555'),
 ('66666666H', 222444, 'H6666666'),
-('77777777I', 666000, 'I7777777'),
-('88888888J', 888111, 'J8888888');
+('77777777I', 666000, 'I7777777');
 -- Insertar más valores en la tabla Receta_medica
 INSERT INTO Receta_medica (Fecha, Numero_colegiado) VALUES
 ('2023-03-10', 654321),
@@ -327,7 +331,6 @@ INSERT INTO Receta_medica (Fecha, Numero_colegiado) VALUES
 ('2023-06-15', 333777),
 ('2023-07-25', 222444),
 ('2023-08-30', 777333),
-('2023-09-12', 888111),
 ('2023-10-18', 666000);
 
 -- Insertar más valores en la tabla Medicamento
@@ -338,8 +341,7 @@ INSERT INTO Medicamento (Tipo, Precio, Nombre, Cantidad, Codigo_receta) VALUES
 ('Antibiótico', 25.00, 'Ciprofloxacino', 20, 4),
 ('Antihipertensivo', 30.50, 'Losartán', 10, 5),
 ('Antipirético', 9.99, 'Ibuprofeno', 15, 6),
-('Antiemético', 15.75, 'Ondansetrón', 12, 7),
-('Antiulceroso', 22.00, 'Omeprazol', 18, 8);
+('Antiemético', 15.75, 'Ondansetrón', 12, 7);
 
 -- Insertar valores en la tabla Equipo_medico
 INSERT INTO Equipo_medico (Tipo, Precio, Nombre, Codigo_unidad_medica, Nombre_hospital, Localizacion_hospital) VALUES
@@ -373,8 +375,7 @@ INSERT INTO Utiliza (Codigo_equipo_medico, Numero_colegiado) VALUES
 (4, 111999),
 (5, 777333),
 (6, 222444),
-(7, 666000),
-(8, 888111);
+(7, 666000);
 
 SELECT * FROM Paciente;
 SELECT * FROM ConsultarPaciente();
