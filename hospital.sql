@@ -377,6 +377,49 @@ INSERT INTO Utiliza (Codigo_equipo_medico, Numero_colegiado) VALUES
 (6, 222444),
 (7, 666000);
 
+
+-- Restricciones para la tabla Paciente
+ALTER TABLE Paciente
+ADD CONSTRAINT check_edad_positive CHECK (Edad >= 0);
+
+-- Restricciones para la tabla Telefono
+ALTER TABLE Telefono
+ADD CONSTRAINT check_telefono_positive CHECK (Telefono > 0);
+
+-- Restricciones para la tabla Receta_medica
+ALTER TABLE Receta_medica
+ADD CONSTRAINT check_fecha_pasada CHECK (Fecha <= CURRENT_DATE);
+
+-- Restricciones para la tabla Medicamento
+ALTER TABLE Medicamento
+ADD CONSTRAINT check_precio_positive CHECK (Precio >= 0)
+, ADD CONSTRAINT check_cantidad_positive CHECK (Cantidad >= 0);
+
+-- Restricciones para la tabla Equipo_medico
+ALTER TABLE Equipo_medico
+ADD CONSTRAINT check_precio_positive CHECK (Precio >= 0);
+
+-- Restricciones para la tabla Utiliza
+ALTER TABLE Utiliza
+ADD CONSTRAINT check_codigo_equipo_valido CHECK (Codigo_equipo_medico IS NOT NULL);
+
+-- Crear una función para verificar que la fecha de la cita no sea anterior a la fecha de nacimiento del paciente
+CREATE OR REPLACE FUNCTION verificar_fecha_cita()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (SELECT Fecha_nacimiento FROM Paciente WHERE DNI = NEW.DNI_paciente) > NEW.Fecha THEN
+        RAISE EXCEPTION 'La fecha de la cita no puede ser anterior a la fecha de nacimiento del paciente';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear una aserción que utiliza la función
+CREATE TRIGGER asercion_fecha_cita
+BEFORE INSERT OR UPDATE ON Cita
+FOR EACH ROW
+EXECUTE FUNCTION verificar_fecha_cita();
+
 SELECT * FROM Paciente;
 SELECT * FROM ConsultarPaciente();
 -- Hospital
