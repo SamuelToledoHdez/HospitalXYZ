@@ -1,6 +1,5 @@
-﻿import os
+import os
 import psycopg2
-import random
 from flask import Flask, render_template, request, url_for, redirect, jsonify
 
 app = Flask(__name__)
@@ -9,7 +8,7 @@ def get_db_connection():
     try:
         conn = psycopg2.connect(
             host='localhost',
-            database="hospitalxyz",
+            database="hospitalxyzz",
             user="",
             password=""
         )
@@ -34,6 +33,23 @@ def index():
         cur.close()
         conn.close()
         return render_template('index.html', patients=patients)
+
+    except Exception as e:
+        return f"An error occurred: {e}"
+    
+@app.route('/citas/')
+def index2():
+    try:
+        conn = get_db_connection()
+        if conn is None:
+            return "Error connecting to the database."
+        
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM CITA;')
+        dates = cur.fetchall()
+        cur.close()
+        conn.close()
+        return render_template('index2.html', dates=dates)
 
     except Exception as e:
         return f"An error occurred: {e}"
@@ -66,9 +82,38 @@ def create():
             cur.close()
             conn.close()
 
-            return redirect(url_for('index'))
+            return redirect(url_for('index2'))
 
         return render_template('create.html')
+    
+    except Exception as e:
+        return f"An error occurred: {e}"
+    
+
+
+@app.route('/create/paciente/', methods=('GET', 'POST'))
+def create2():
+    try:
+        if request.method == 'POST':
+            dni = request.form['dni']
+            nombre = request.form['nombre']
+            historial_medico = request.form['historial_medico']
+            fecha_nacimiento = request.form['fecha_nacimiento']
+            edad = request.form['edad']
+
+            conn = get_db_connection()
+            if conn is None:
+                return "Error connecting to the database."
+
+            cur = conn.cursor()
+            cur.execute('INSERT INTO Paciente (DNI, Nombre, Historial_medico, Fecha_nacimiento, Edad) VALUES (%s, %s, %s, %s, %s)',
+                        (dni, nombre, historial_medico, fecha_nacimiento, edad))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return redirect(url_for('index'))
+
+        return render_template('create2.html')
 
     except Exception as e:
         return f"An error occurred: {e}"
@@ -78,7 +123,7 @@ def create():
     
     
 
-@app.route('/delete/', methods=('GET', 'POST'))
+@app.route('/delete/cita/', methods=('GET', 'POST'))
 def delete():
     try:
         if request.method == 'POST':
@@ -93,14 +138,37 @@ def delete():
             conn.commit()
             cur.close()
             conn.close()
-            return redirect(url_for('index'))
+            return redirect(url_for('index2'))
 
         return render_template('delete.html')
 
     except Exception as e:
         return f"An error occurred: {e}"
+    
 
-@app.route('/update/', methods=['GET', 'POST'])
+@app.route('/delete/paciente/', methods=('GET', 'POST'))
+def delete2():
+    try:
+        if request.method == 'POST':
+            dni = request.form['dni']
+
+            conn = get_db_connection()
+            if conn is None:
+                return "Error connecting to the database."
+
+            cur = conn.cursor()
+            cur.execute('DELETE FROM Paciente WHERE DNI = %s', [dni])
+            conn.commit()
+            cur.close()
+            conn.close()
+            return redirect(url_for('index'))
+
+        return render_template('delete2.html')
+
+    except Exception as e:
+        return f"An error occurred: {e}"
+
+@app.route('/update/cita/', methods=['GET', 'POST'])
 def update():
     try:
         if request.method == 'POST':
@@ -118,15 +186,48 @@ def update():
             conn.commit()
             cur.close()
             conn.close()
-            return redirect(url_for('index'))
+            return redirect(url_for('index2'))
 
         return render_template('update.html')
+
+    except Exception as e:
+        return f"An error occurred: {e}"
+    
+
+@app.route('/update/paciente/', methods=['GET', 'POST'])
+def update2():
+    try:
+        if request.method == 'POST':
+            dni = request.form['dni']
+            nombre = request.form['nombre']
+            historial_medico = request.form['historial_medico']
+            fecha_nacimiento = request.form['fecha_nacimiento']
+            edad = request.form['edad']
+
+            conn = get_db_connection()
+            if conn is None:
+                return "Error connecting to the database."
+
+            cur = conn.cursor()
+            cur.execute('UPDATE Paciente SET Nombre = %s, Historial_medico = %s, Fecha_nacimiento = %s, Edad= %s WHERE DNI = %s',
+                        (nombre, historial_medico, fecha_nacimiento, edad, dni))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return redirect(url_for('index'))
+
+        return render_template('update2.html')
 
     except Exception as e:
         return f"An error occurred: {e}"
 
 @app.route('/about/')
 def about():
+    return render_template('about.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
     return render_template('about.html')
 
 if __name__ == '__main__':
