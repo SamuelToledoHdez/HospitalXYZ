@@ -78,8 +78,9 @@ CREATE TABLE Telefono (
 
 -- Crear la tabla de los enfermeros
 CREATE TABLE Enfermero (
-    DNI VARCHAR(20) PRIMARY KEY,
-    Nombre VARCHAR(100)
+    DNI TEXT PRIMARY KEY,
+    Nombre VARCHAR(100),
+    DNI_cifrado TEXT
 );
 
 
@@ -239,6 +240,70 @@ BEGIN
  END;
 $$ LANGUAGE plpgsql;
 
+-- Crear la función de encriptación para Enfermero
+CREATE OR REPLACE FUNCTION CifrarDNIEnfermeroTriggerFunction()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Utilizar la función de encriptación pgp_sym_encrypt con una clave secreta
+    NEW.dni_cifrado := pgp_sym_encrypt(NEW.DNI, 'clave_secreta');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger para Enfermero
+CREATE TRIGGER CifrarDNIEnfermeroTrigger
+BEFORE INSERT ON "enfermero"
+FOR EACH ROW
+EXECUTE FUNCTION CifrarDNIEnfermeroTriggerFunction();
+
+-- Crear la función de descifrado para Enfermero
+CREATE OR REPLACE FUNCTION DescifrarDNIEnfermero(dni_cifrado TEXT)
+RETURNS TEXT AS $$
+BEGIN
+    -- Utilizar la función de descifrado pgp_sym_decrypt_bytea con la clave secreta
+    BEGIN
+        RETURN encode(pgp_sym_decrypt_bytea(dni_cifrado::bytea, 'clave_secreta'), 'escape')::text;
+    EXCEPTION
+        WHEN OTHERS THEN
+            -- Manejar cualquier excepción que pueda surgir al descifrar
+            RAISE EXCEPTION 'Error al descifrar el DNI_Cifrado (%): %', dni_cifrado, SQLSTATE;
+    END;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear un procedimiento almacenado que utiliza la función de descifrado para Enfermero
+CREATE OR REPLACE FUNCTION ConsultarEnfermero()
+RETURNS TABLE (
+    nombre VARCHAR(100),
+    dni TEXT,
+    dni_cifrado TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        nombre,
+        DescifrarDNIEnfermero(dni_cifrado) AS dni,
+        dni_cifrado
+    FROM "enfermero";
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear la función y el trigger para comprobar la fecha de la cita
+CREATE OR REPLACE FUNCTION VerificarFechaCita()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.Fecha <= CURRENT_DATE THEN
+        RAISE EXCEPTION 'La fecha de la cita debe ser posterior a hoy';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger
+CREATE TRIGGER VerificarFechaCitaTrigger
+BEFORE INSERT ON "cita"
+FOR EACH ROW
+EXECUTE FUNCTION VerificarFechaCita();
 
 -----------------------------------------------------------------------------------------------
 -- Insertar valores en la tabla Hospital
@@ -268,13 +333,13 @@ INSERT INTO Telefono (DNI_paciente, Telefono) VALUES
 ('77777777I', 777777777);
 
 INSERT INTO Cita(Fecha, Motivo, DNI_paciente) VALUES
-('2023-03-10', 'Consulta de rutina', '11111111C'),
-('2023-04-05', 'Consulta de rutina', '22222222D'),
-('2023-05-20', 'Consulta de rutina', '33333333E'),
-('2023-06-15', 'Consulta de rutina', '44444444F'),
-('2023-07-25', 'Consulta de rutina', '55555555G'),
-('2023-08-30', 'Consulta de rutina', '66666666H'),
-('2023-10-18', 'Consulta de rutina', '77777777I');
+    ('2025-03-10', 'Consulta de rutina', '11111111C'),
+    ('2025-04-05', 'Consulta de rutina', '22222222D'),
+    ('2025-05-20', 'Consulta de rutina', '33333333E'),
+    ('2025-06-15', 'Consulta de rutina', '44444444F'),
+    ('2025-07-25', 'Consulta de rutina', '55555555G'),
+    ('2025-08-30', 'Consulta de rutina', '66666666H'),
+    ('2025-10-18', 'Consulta de rutina', '77777777I');
 
 -- Insertar más valores en la tabla Enfermero
 INSERT INTO Enfermero (DNI, Nombre) VALUES
