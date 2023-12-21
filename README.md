@@ -1,5 +1,11 @@
 # README - Sistema de Base de Datos para Hospital XYZ
 
+# Participantes
+
+JAVIER GONZÁLEZ DE LA BARREDA ARIMANY
+JUAN DIEGO RENDÓN CACHAFEIRO
+SAMUEL TOLEDO HERNÁNDEZ
+
 ## Descripción del Sistema
 
 Este repositorio contiene la estructura básica de una base de datos para el sistema de información de un hospital llamado "Hospital XYZ". La base de datos está diseñada para gestionar información relacionada con pacientes, citas médicas, médicos, enfermeros, recetas médicas, medicamentos, equipos médicos y unidades médicas.
