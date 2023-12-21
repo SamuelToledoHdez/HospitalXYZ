@@ -1,0 +1,39 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Actualizar datos del paciente {% endblock %}</h1>
+    <form method="post">
+        <p>
+            <label for="dni">DNI del Paciente</label>
+            <input type="text" name="dni"
+                   placeholder="DNI del Paciente">
+            </input>
+        </p>
+        <p>
+            <label for="nombre">Nombre del paciente</label>
+            <input type="text" name="nombre"
+                   placeholder="Nombre del Paciente">
+            </input>
+        </p>
+        <p>
+            <label for="historial_medico">Historial médico del Paciente</label>
+            <input type="text" name="historial_medico"
+                   placeholder="Historial médico del Paciente">
+            </input>
+        </p>
+        <p>
+            <label for="fecha_nacimiento">Fecha de nacimiento del paciente</label>
+            <input type="date" name="fecha_nacimiento"
+                   placeholder="Fecha de nacimiento del paciente">
+            </input>
+        </p>
+        <p>
+            <label for="edad">Edad del paciente</label>
+            <input type="int" name="edad"
+                   placeholder="Edad del paciente">
+            </input>
+        <p>
+            <button type="submit">Update</button>
+        </p>
+    </form>
+{% endblock %}

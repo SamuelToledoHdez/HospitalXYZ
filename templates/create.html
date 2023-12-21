@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Crear Cita Médica</h1>
+    <form method="post" action="{{ url_for('create') }}">
+        <label for="dni">DNI del Paciente:</label>
+        <input type="text" name="dni" required><br>
+        <label for="fecha">Fecha de la Cita:</label>
+        <input type="date" name="fecha" required><br>
+        <label for="motivo">Motivo:</label>
+        <textarea name="motivo" required></textarea><br>
+        <input type="submit" value="Crear Cita">
+    </form>
+{% endblock %}
+
+
+

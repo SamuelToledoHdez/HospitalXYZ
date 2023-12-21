@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Añadir Paciente</h1>
+    <form method="post" action="{{ url_for('create2') }}">
+        <label for="dni">DNI del Paciente:</label>
+        <input type="text" name="dni" required><br>
+        <label for="nombre">Nombre del Paciente:</label>
+        <input type="text" name="nombre" required><br>
+        <label for="historial_medico">Historial médico del paciente:</label>
+        <input type="text" name="historial_medico" required><br>
+        <label for="fecha_nacimiento">Fecha de nacimiento del Paciente:</label>
+        <input type="date" name="fecha_nacimiento" required><br>
+        <label for="edad">Edad del Paciente:</label>
+        <input type="int" name="edad" required><br>
+        <input type="submit" value="Crear Paciente">
+    </form>
+{% endblock %}

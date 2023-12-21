@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Citas {% endblock %}</h1>
+    {% for date in dates %}
+        <div class='date'>
+            <h3>Código de cita: {{ date[0] }} </h3>
+            <h4>Fecha de la cita: </a>: {{ date[1] }}</h4>
+            <h4>Motivo: {{ date[2] }}</h4>
+            <h4>DNI del paciente: {{ date[3] }}</h4>
+            <br>  {# Agrega un salto de línea aquí #}
+        </div>
+    {% endfor %}
+    
+{% endblock %}
