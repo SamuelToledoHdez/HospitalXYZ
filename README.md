@@ -32,6 +32,29 @@ BEGIN
 END;
 ```
 
+### Trigger para fecha de las citas
+
+Además existe un trigger para poder descartar todas las citas que no han sido creadas con una fecha válida, es decir una fecha menor al día actual.
+
+```sql
+-- Crear la función y el trigger para comprobar la fecha de la cita
+CREATE OR REPLACE FUNCTION VerificarFechaCita()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.Fecha <= CURRENT_DATE THEN
+        RAISE EXCEPTION 'La fecha de la cita debe ser posterior a hoy';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger
+CREATE TRIGGER VerificarFechaCitaTrigger
+BEFORE INSERT OR UPDATE ON "cita"
+FOR EACH ROW
+EXECUTE FUNCTION VerificarFechaCita();
+```
+
 ## Consideraciones de Seguridad
 
 Es importante destacar que la implementación del cifrado y descifrado del DNI tiene como objetivo proteger la confidencialidad de la información del paciente. Se debe gestionar de manera segura la clave secreta utilizada en el proceso de cifrado para garantizar la integridad del sistema.
